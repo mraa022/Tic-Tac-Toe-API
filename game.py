@@ -9,15 +9,18 @@ class board:
         self.num_places = 0 # num of times a symbol was placed (used to check for draws efficiently)
     def reward(self,reward,punishment, draw, symbol):
         player_won = self.is_terminal(self.board)
-       
         if player_won == symbol:
+            
             reward = reward
         elif player_won == 'D':
             reward = draw
-        elif player_won != symbol:
+        elif player_won and player_won != symbol:
+            
             reward = punishment
+            
         else:
             reward = 0
+            
         return reward
     def place(self,symbol,place):
         
