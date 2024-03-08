@@ -3,10 +3,11 @@ import random
 import time
 import numpy as np
 from math import sqrt
-from functools import partial
+import redis
+import json
+
 flip = {'X':'O','O':'X'}
 curr = 'X'
-
 
 
 def hash_board_r(board_matrix):
@@ -17,7 +18,7 @@ def hash_board_r(board_matrix):
         for j in range(r):
             total+= (r**k)*board_matrix[i][j]
             k+=1
-    return int(total)
+    return str(int(total))
 
 class Player:
     def __init__(self,symbol,epsilon,alpha=0.1,gamma=0.9,reward=1,punishment=-1,draw=0):
@@ -56,7 +57,7 @@ def train(X_alpha,X_epsilon,O_alpha,O_epsilon,X_gamma,O_gamma,Board):
     player1 = Player('X',epsilon=X_epsilon,alpha=X_alpha,gamma=X_gamma) # by default player 1 (the 'X' player) will start first
     player2 = Player('O',epsilon=O_epsilon,alpha=O_alpha,gamma=O_gamma)
     seen_states = {}
-    STEPS = 10000
+    STEPS = 1
     flip_player = {player1:player2, player2:player1}
     for _ in range(STEPS):
        
@@ -102,6 +103,7 @@ def train(X_alpha,X_epsilon,O_alpha,O_epsilon,X_gamma,O_gamma,Board):
                     other_reward = Board.reward(other_player.reward, other_player.punishment, other_player.draw, other_player.symbol)
                     if other_player.Q.get(s_hash,None) is not None:
                         other_player.Q[s_hash] = {str((0,0)):0,str((0,1)):0,str((0,2)):0,str((1,0)):0,str((1,1)):0,str((1,2)):0,str((2,0)):0,str((2,1)):0,str((2,2)):0}
+                        
                     other_player.Q[s_hash][str(a)]+= other_player.alpha*(other_reward - other_player.Q[s_hash][str(a)])
                     
                     
@@ -118,4 +120,5 @@ def train(X_alpha,X_epsilon,O_alpha,O_epsilon,X_gamma,O_gamma,Board):
                 
 
                 states[curr] = []
+    
     return player1,player2
